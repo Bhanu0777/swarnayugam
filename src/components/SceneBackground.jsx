@@ -27,14 +27,14 @@ export default function SceneBackground() {
             speed={2.5}
             rayColor1="#FFD54F"
             rayColor2="#FF8A00"
-            intensity={1.5}
-            spread={3.5}
+            intensity={3}
+            spread={4}
             origin="top-left"
             tilt={0}
-            saturation={1.5}
-            blend={0.75}
-            falloff={1.0}
-            opacity={1}
+            saturation={2}
+            blend={0.8}
+            falloff={0.8}
+            opacity={1.2}
           />
         </div>
       </div>
