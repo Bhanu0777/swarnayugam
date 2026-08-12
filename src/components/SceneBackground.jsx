@@ -21,20 +21,20 @@ export default function SceneBackground() {
         {/* Atmospheric overlay */}
         <div className="absolute inset-0 bg-amber-900/20"></div>
 
-        {/* Left-side rays effect (full-screen range) */}
+        {/* Left-side rays effect (full-screen range, less intensity) */}
         <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }}>
           <SideRays
             speed={2.5}
             rayColor1="#FFD54F"
             rayColor2="#FF8A00"
-            intensity={3}
-            spread={4}
+            intensity={1.2}
+            spread={3}
             origin="top-left"
             tilt={0}
-            saturation={2}
-            blend={0.8}
-            falloff={0.8}
-            opacity={1.2}
+            saturation={1.5}
+            blend={0.75}
+            falloff={1.5}
+            opacity={0.8}
           />
         </div>
       </div>

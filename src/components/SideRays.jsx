@@ -17,16 +17,16 @@ const originToFlip = (origin) => {
 
 export default function SideRays({
   speed = 2.5,
-  rayColor1 = '#EAB308',
-  rayColor2 = '#96c8ff',
-  intensity = 2,
-  spread = 2,
-  origin = 'top-right',
+  rayColor1 = '#FFD54F',
+  rayColor2 = '#FF8A00',
+  intensity = 1.2,
+  spread = 3,
+  origin = 'top-left',
   tilt = 0,
   saturation = 1.5,
   blend = 0.75,
-  falloff = 2.0,
-  opacity = 1.0,
+  falloff = 1.5,
+  opacity = 0.8,
   className = ''
 }) {
   const containerRef = useRef(null)
@@ -116,10 +116,10 @@ float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord, float seedA,
   vec2 sourceToCoord = coord - raySource;
   float cosAngle = dot(normalize(sourceToCoord), rayRefDirection);
   return clamp(
-    (0.45 + 0.15 * sin(cosAngle * seedA + iTime * speed)) +
-    (0.3 + 0.2 * cos(-cosAngle * seedB + iTime * speed)),
+    (0.5 + 0.25 * sin(cosAngle * seedA + iTime * speed)) +
+    (0.4 + 0.3 * cos(-cosAngle * seedB + iTime * speed)),
     0.0, 1.0) *
-    clamp((iResolution.x - length(sourceToCoord)) / iResolution.x, 0.5, 1.0);
+    clamp((iResolution.x - length(sourceToCoord)) / iResolution.x, 0.3, 1.0);
 }
 
 void main() {
@@ -128,7 +128,7 @@ void main() {
   if (iFlipY > 0.5) fragCoord.y = iResolution.y - fragCoord.y;
 
   vec2 coord = vec2(fragCoord.x, iResolution.y - fragCoord.y);
-  vec2 rayPos = vec2(iResolution.x * 1.1, -0.5 * iResolution.y);
+  vec2 rayPos = vec2(iResolution.x * 0.85, -0.2 * iResolution.y);
 
   float tiltRad = iTilt * 3.14159265 / 180.0;
   float cs = cos(tiltRad);
@@ -136,17 +136,17 @@ void main() {
   vec2 rel = coord - rayPos;
   vec2 tiltedCoord = vec2(rel.x * cs - rel.y * sn, rel.x * sn + rel.y * cs) + rayPos;
 
-  float halfSpread = iSpread * 0.275;
+  float halfSpread = iSpread * 0.3;
   vec2 rayRefDir1 = normalize(vec2(cos(0.785398 + halfSpread), sin(0.785398 + halfSpread)));
   vec2 rayRefDir2 = normalize(vec2(cos(0.785398 - halfSpread), sin(0.785398 - halfSpread)));
 
   vec4 rays1 = vec4(iRayColor1, 1.0) * rayStrength(rayPos, rayRefDir1, tiltedCoord, 36.2214, 21.11349, iSpeed);
   vec4 rays2 = vec4(iRayColor2, 1.0) * rayStrength(rayPos, rayRefDir2, tiltedCoord, 22.3991, 18.0234, iSpeed * 0.2);
 
-  vec4 color = rays1 * (1.0 - iBlend) * 0.9 + rays2 * iBlend * 0.9;
+  vec4 color = rays1 * (1.0 - iBlend) * 1.2 + rays2 * iBlend * 1.2;
 
   float distanceToLight = length(fragCoord.xy - vec2(rayPos.x, iResolution.y - rayPos.y)) / iResolution.y;
-  float brightness = iIntensity * 0.4 / pow(max(distanceToLight, 0.001), iFalloff);
+  float brightness = iIntensity * 0.6 / pow(max(distanceToLight, 0.01), iFalloff);
   color.rgb *= brightness;
 
   float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
