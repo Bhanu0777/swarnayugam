@@ -1,5 +1,11 @@
 {
   "framework": "vite",
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "./dist"
+  "buildCommand": "npm install && npm run build && ls -la dist",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
 }
