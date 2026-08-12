@@ -187,7 +187,6 @@ void main() {
         program,
         positionBuffer,
         render: function() {
-          gl.useProgram(this.program.program)
           gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer)
           const posLocation = gl.getAttribLocation(this.program.program, 'position')
           gl.vertexAttribPointer(posLocation, 2, gl.FLOAT, false, 0, 0)
@@ -212,19 +211,23 @@ void main() {
         
         uniforms.iTime.value = t * 0.001
         try {
-          // Update all uniforms
           const program = mesh.program.program
+          gl.useProgram(program)
+          
+          // Update all uniforms
           Object.keys(uniforms).forEach(key => {
             const uniform = uniforms[key]
             const location = gl.getUniformLocation(program, key)
-            if (uniform.value instanceof Array) {
-              if (uniform.value.length === 3) {
-                gl.uniform3f(location, uniform.value[0], uniform.value[1], uniform.value[2])
-              } else if (uniform.value.length === 2) {
-                gl.uniform2f(location, uniform.value[0], uniform.value[1])
+            if (location !== null) {
+              if (uniform.value instanceof Array) {
+                if (uniform.value.length === 3) {
+                  gl.uniform3f(location, uniform.value[0], uniform.value[1], uniform.value[2])
+                } else if (uniform.value.length === 2) {
+                  gl.uniform2f(location, uniform.value[0], uniform.value[1])
+                }
+              } else {
+                gl.uniform1f(location, uniform.value)
               }
-            } else {
-              gl.uniform1f(location, uniform.value)
             }
           })
           mesh.render()
