@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { Renderer, Program, Triangle, Mesh } from 'ogl'
+import { Renderer, Program, Mesh } from 'ogl'
 
 const hexToRgb = (hex) => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -175,9 +175,26 @@ void main() {
       }
       uniformsRef.current = uniforms
 
-      const geometry = new Triangle(gl)
       const program = new Program(gl, { vertex: vert, fragment: frag, uniforms })
-      const mesh = new Mesh(gl, { geometry, program })
+      
+      // Create geometry with simple triangle covering the screen
+      const positionBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+      const positions = new Float32Array([-1, -1, 3, -1, -1, 3])
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW)
+
+      const mesh = {
+        program,
+        positionBuffer,
+        render: function() {
+          gl.useProgram(this.program.program)
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer)
+          const posLocation = gl.getAttribLocation(this.program.program, 'position')
+          gl.vertexAttribPointer(posLocation, 2, gl.FLOAT, false, 0, 0)
+          gl.enableVertexAttribArray(posLocation)
+          gl.drawArrays(gl.TRIANGLES, 0, 3)
+        }
+      }
       meshRef.current = mesh
 
       const updateSize = () => {
@@ -190,11 +207,30 @@ void main() {
 
       const loop = (t) => {
         if (!rendererRef.current || !uniformsRef.current || !meshRef.current) return
+        const mesh = meshRef.current
+        if (!mesh.program) return
+        
         uniforms.iTime.value = t * 0.001
         try {
-          renderer.render({ scene: mesh })
+          // Update all uniforms
+          const program = mesh.program.program
+          Object.keys(uniforms).forEach(key => {
+            const uniform = uniforms[key]
+            const location = gl.getUniformLocation(program, key)
+            if (uniform.value instanceof Array) {
+              if (uniform.value.length === 3) {
+                gl.uniform3f(location, uniform.value[0], uniform.value[1], uniform.value[2])
+              } else if (uniform.value.length === 2) {
+                gl.uniform2f(location, uniform.value[0], uniform.value[1])
+              }
+            } else {
+              gl.uniform1f(location, uniform.value)
+            }
+          })
+          mesh.render()
           animationIdRef.current = requestAnimationFrame(loop)
         } catch (e) {
+          console.error('Render error:', e)
           return
         }
       }
